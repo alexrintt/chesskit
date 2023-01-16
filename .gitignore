@@ -1,0 +1,6 @@
+.vscode/
+.dart_tool/
+
+# This is a library package:
+# https://stackoverflow.com/questions/16136739/in-dart-and-pub-should-i-add-pubspec-lock-to-my-gitignore.
+pubspec.lock
