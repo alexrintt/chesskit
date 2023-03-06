@@ -1,0 +1,426 @@
+import 'package:fast_immutable_collections/fast_immutable_collections.dart'
+    hide Tuple2;
+import 'package:meta/meta.dart';
+
+import './utils.dart';
+
+enum Side {
+  white,
+  black;
+
+  Side get opposite => this == Side.white ? Side.black : Side.white;
+}
+
+enum CastlingSide {
+  queen,
+  king;
+}
+
+enum Role {
+  pawn,
+  knight,
+  bishop,
+  rook,
+  king,
+  queen;
+
+  static Role? fromChar(String ch) {
+    switch (ch.toLowerCase()) {
+      case 'p':
+        return Role.pawn;
+      case 'n':
+        return Role.knight;
+      case 'b':
+        return Role.bishop;
+      case 'r':
+        return Role.rook;
+      case 'q':
+        return Role.queen;
+      case 'k':
+        return Role.king;
+      default:
+        return null;
+    }
+  }
+
+  String get char {
+    switch (this) {
+      case Role.pawn:
+        return 'p';
+      case Role.knight:
+        return 'n';
+      case Role.bishop:
+        return 'b';
+      case Role.rook:
+        return 'r';
+      case Role.queen:
+        return 'q';
+      case Role.king:
+        return 'k';
+    }
+  }
+}
+
+/// Number between 0 and 63 included representing a square on the board.
+///
+/// See [SquareSet] to see how the mapping looks like.
+typedef Square = int;
+
+/// All the squares on the board.
+abstract class Squares {
+  static const int a1 = 0;
+  static const int b1 = 1;
+  static const int c1 = 2;
+  static const int d1 = 3;
+  static const int e1 = 4;
+  static const int f1 = 5;
+  static const int g1 = 6;
+  static const int h1 = 7;
+  static const int a2 = 8;
+  static const int b2 = 9;
+  static const int c2 = 10;
+  static const int d2 = 11;
+  static const int e2 = 12;
+  static const int f2 = 13;
+  static const int g2 = 14;
+  static const int h2 = 15;
+  static const int a3 = 16;
+  static const int b3 = 17;
+  static const int c3 = 18;
+  static const int d3 = 19;
+  static const int e3 = 20;
+  static const int f3 = 21;
+  static const int g3 = 22;
+  static const int h3 = 23;
+  static const int a4 = 24;
+  static const int b4 = 25;
+  static const int c4 = 26;
+  static const int d4 = 27;
+  static const int e4 = 28;
+  static const int f4 = 29;
+  static const int g4 = 30;
+  static const int h4 = 31;
+  static const int a5 = 32;
+  static const int b5 = 33;
+  static const int c5 = 34;
+  static const int d5 = 35;
+  static const int e5 = 36;
+  static const int f5 = 37;
+  static const int g5 = 38;
+  static const int h5 = 39;
+  static const int a6 = 40;
+  static const int b6 = 41;
+  static const int c6 = 42;
+  static const int d6 = 43;
+  static const int e6 = 44;
+  static const int f6 = 45;
+  static const int g6 = 46;
+  static const int h6 = 47;
+  static const int a7 = 48;
+  static const int b7 = 49;
+  static const int c7 = 50;
+  static const int d7 = 51;
+  static const int e7 = 52;
+  static const int f7 = 53;
+  static const int g7 = 54;
+  static const int h7 = 55;
+  static const int a8 = 56;
+  static const int b8 = 57;
+  static const int c8 = 58;
+  static const int d8 = 59;
+  static const int e8 = 60;
+  static const int f8 = 61;
+  static const int g8 = 62;
+  static const int h8 = 63;
+}
+
+typedef BySide<T> = IMap<Side, T>;
+typedef ByRole<T> = IMap<Role, T>;
+typedef ByCastlingSide<T> = IMap<CastlingSide, T>;
+
+@immutable
+class Piece {
+  const Piece({
+    required this.color,
+    required this.role,
+    this.promoted = false,
+  });
+
+  final Side color;
+  final Role role;
+  final bool promoted;
+
+  static Piece? fromChar(String ch) {
+    final Role? role = Role.fromChar(ch);
+    if (role != null) {
+      return Piece(
+        role: role,
+        color: ch.toLowerCase() == ch ? Side.black : Side.white,
+      );
+    }
+    return null;
+  }
+
+  String get fenChar {
+    String r = role.char;
+    if (color == Side.white) r = r.toUpperCase();
+    if (promoted) r += '~';
+    return r;
+  }
+
+  Piece copyWith({
+    Side? color,
+    Role? role,
+    bool? promoted,
+  }) {
+    return Piece(
+      color: color ?? this.color,
+      role: role ?? this.role,
+      promoted: promoted ?? this.promoted,
+    );
+  }
+
+  @override
+  String toString() {
+    return '${color.name}${role.name}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is Piece &&
+            other.runtimeType == runtimeType &&
+            color == other.color &&
+            role == other.role &&
+            promoted == other.promoted;
+  }
+
+  @override
+  int get hashCode => Object.hash(color, role, promoted);
+
+  static const Piece whitePawn = Piece(color: Side.white, role: Role.pawn);
+  static const Piece whiteKnight = Piece(color: Side.white, role: Role.knight);
+  static const Piece whiteBishop = Piece(color: Side.white, role: Role.bishop);
+  static const Piece whiteRook = Piece(color: Side.white, role: Role.rook);
+  static const Piece whiteQueen = Piece(color: Side.white, role: Role.queen);
+  static const Piece whiteKing = Piece(color: Side.white, role: Role.king);
+
+  static const Piece blackPawn = Piece(color: Side.black, role: Role.pawn);
+  static const Piece blackKnight = Piece(color: Side.black, role: Role.knight);
+  static const Piece blackBishop = Piece(color: Side.black, role: Role.bishop);
+  static const Piece blackRook = Piece(color: Side.black, role: Role.rook);
+  static const Piece blackQueen = Piece(color: Side.black, role: Role.queen);
+  static const Piece blackKing = Piece(color: Side.black, role: Role.king);
+}
+
+/// Base class for a chess move.
+///
+/// A move can be either a [NormalMove] or a [DropMove].
+@immutable
+abstract class Move {
+  const Move({
+    required this.to,
+  });
+
+  /// The target square of this move.
+  final Square to;
+
+  /// Gets the UCI notation of this move.
+  String get uci;
+
+  /// Constructs a [Move] from an UCI string.
+  ///
+  /// Returns `null` if UCI string is not valid.
+  static Move? fromUci(String str) {
+    if (str[1] == '@' && str.length == 4) {
+      final Role? role = Role.fromChar(str[0]);
+      final Square? to = parseSquare(str.substring(2));
+      if (role != null && to != null) return DropMove(to: to, role: role);
+    } else if (str.length == 4 || str.length == 5) {
+      final Square? from = parseSquare(str.substring(0, 2));
+      final Square? to = parseSquare(str.substring(2, 4));
+      Role? promotion;
+      if (str.length == 5) {
+        promotion = Role.fromChar(str[4]);
+        if (promotion == null) {
+          return null;
+        }
+      }
+      if (from != null && to != null) {
+        return NormalMove(from: from, to: to, promotion: promotion);
+      }
+    }
+    return null;
+  }
+
+  @override
+  String toString() {
+    return 'Move($uci)';
+  }
+}
+
+/// Represents a chess move, possibly a promotion.
+@immutable
+class NormalMove extends Move {
+  const NormalMove({
+    required this.from,
+    required super.to,
+    this.promotion,
+  });
+
+  /// The origin square of this move.
+  final Square from;
+
+  /// The role of the promoted piece, if any.
+  final Role? promotion;
+
+  /// Gets UCI notation, like `g1f3` for a normal move, `a7a8q` for promotion to a queen.
+  @override
+  String get uci =>
+      toAlgebraic(from) +
+      toAlgebraic(to) +
+      (promotion != null ? promotion!.char : '');
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other.runtimeType == runtimeType && hashCode == other.hashCode;
+  }
+
+  @override
+  int get hashCode => Object.hash(from, to, promotion);
+}
+
+/// Represents a drop move.
+@immutable
+class DropMove extends Move {
+  const DropMove({
+    required super.to,
+    required this.role,
+  });
+
+  final Role role;
+
+  /// Gets UCI notation of the drop, like `Q@f7`.
+  @override
+  String get uci => '${role.char.toUpperCase()}@${toAlgebraic(to)}';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other.runtimeType == runtimeType && hashCode == other.hashCode;
+  }
+
+  @override
+  int get hashCode => Object.hash(to, role);
+}
+
+/// Represents a 2-tuple, or pair.
+@immutable
+class Tuple2<T1, T2> {
+  /// First item of the tuple.
+  final T1 item1;
+
+  /// Second item of the tuple.
+  final T2 item2;
+
+  /// Creates a new tuple value with the specified items.
+  const Tuple2(this.item1, this.item2);
+
+  /// Returns a tuple with the first item set to the specified value.
+  Tuple2<T1, T2> withItem1(T1 v) => Tuple2<T1, T2>(v, item2);
+
+  /// Returns a tuple with the second item set to the specified value.
+  Tuple2<T1, T2> withItem2(T2 v) => Tuple2<T1, T2>(item1, v);
+
+  @override
+  String toString() => '[$item1, $item2]';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Tuple2 && item1 == other.item1 && item2 == other.item2;
+
+  @override
+  int get hashCode => Object.hash(item1, item2);
+}
+
+@immutable
+class FenError implements Exception {
+  final String message;
+  const FenError(this.message);
+}
+
+/// Represents the different possible rules of chess and its variants
+enum Rules {
+  chess,
+  antichess,
+  kingofthehill,
+  threecheck,
+  atomic,
+  horde,
+  racingKings,
+  crazyhouse;
+
+  /// Parses a PGN header variant tag
+  static Rules? fromPgn(String? variant) {
+    switch ((variant ?? 'chess').toLowerCase()) {
+      case 'chess':
+      case 'chess960':
+      case 'chess 960':
+      case 'standard':
+      case 'from position':
+      case 'classical':
+      case 'normal':
+      case 'fischerandom': // Cute Chess
+      case 'fischerrandom':
+      case 'fischer random':
+      case 'wild/0':
+      case 'wild/1':
+      case 'wild/2':
+      case 'wild/3':
+      case 'wild/4':
+      case 'wild/5':
+      case 'wild/6':
+      case 'wild/7':
+      case 'wild/8':
+      case 'wild/8a':
+        return Rules.chess;
+      case 'crazyhouse':
+      case 'crazy house':
+      case 'house':
+      case 'zh':
+        return Rules.crazyhouse;
+      case 'king of the hill':
+      case 'koth':
+      case 'kingofthehill':
+        return Rules.kingofthehill;
+      case 'three-check':
+      case 'three check':
+      case 'threecheck':
+      case 'three check chess':
+      case '3-check':
+      case '3 check':
+      case '3check':
+        return Rules.threecheck;
+      case 'antichess':
+      case 'anti chess':
+      case 'anti':
+        return Rules.antichess;
+      case 'atomic':
+      case 'atom':
+      case 'atomic chess':
+        return Rules.atomic;
+      case 'horde':
+      case 'horde chess':
+        return Rules.horde;
+      case 'racing kings':
+      case 'racingkings':
+      case 'racing':
+      case 'race':
+        return Rules.racingKings;
+      default:
+        return null;
+    }
+  }
+}
