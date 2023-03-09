@@ -1,7 +1,7 @@
 /// Dart chess library for native platforms only.
 ///
 /// All classes are immutable except [PgnNode] and [PgnChildNode].
-library dartchess;
+library chesskit;
 
 export 'src/attacks.dart';
 export 'src/board.dart';
