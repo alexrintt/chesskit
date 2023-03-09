@@ -1,9 +1,9 @@
-name: nicochess
+name: chesskit
 description: Basic chess engine for board validation and move generation.
-homepage: https://github.com/alexrintt/nicochess
-repository: https://github.com/alexrintt/nicochess
-issue_tracker: https://github.com/alexrintt/nicochess/issues
-documentation: https://pub.dev/packages/nicochess
+homepage: https://github.com/alexrintt/chesskit
+repository: https://github.com/alexrintt/chesskit
+issue_tracker: https://github.com/alexrintt/chesskit/issues
+documentation: https://pub.dev/packages/chesskit
 version: 0.1.0
 funding:
  - https://github.com/sponsors/alexrintt
