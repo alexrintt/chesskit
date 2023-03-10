@@ -5,10 +5,13 @@ The original repository is written in TypesScript but this fork was rewritten in
 All credits goes to the original author.
 
 ---
+# ChessKit
+
+[![Pub Version](https://img.shields.io/pub/v/chesskit)](https://pub.dev/packages/chesskit)
 
 This library aims to provide a rich and simple API to generate chess moves and validate board. This also support `FEN` and `PGN` to import or export chess matches.
 
-# Why another chess engine?
+## Why another chess engine?
 
 Although there are some other Dart-based libraries for chess, I did not found one that:
 
@@ -16,6 +19,26 @@ Although there are some other Dart-based libraries for chess, I did not found on
 - Is up-to-date with latest Dart code style guides.
 - Is designed to be fully functional and stateless (immutable).
 
-# Docs
+## Installation
 
-Soon... **this is a work in progress**.
+```yaml
+dependencies:
+  chesskit: ^<latest-version>
+```
+
+Import:
+
+```dart
+import 'package:chesskit/chesskit.dart';
+```
+
+## Usage
+
+```dart
+const SquareSet fullSet = SquareSet.full;
+print(fullSet);
+```
+
+## Contributing
+
+TODO.
